@@ -135,13 +135,14 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
       }
     >
       <Form.TextField id="title" title="Title"/>
-      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/..." value="https://admin.shopify.com/store/"/>
-      <Form.Dropdown id="status" title="Status" storeValue>
+      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/..." value="https://admin.shopify.com/store/" />
+      <Form.Dropdown id="status" title="Status"
+      defaultValue="Not Started">
         <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Red }} title="Not Started" value="Not Started" />
         <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Yellow }} title="Ongoing" value="Ongoing" />
         <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Green }} title="Completed" value="Completed" />
         <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Blue }} title="Maintenace" value="Maintenace" />
-      </Form.Dropdown>
+        </Form.Dropdown>
       <Form.TextArea id="description" title="Project Description" />
       <Form.Separator />
       <Form.TextField id="website" title="Shopify Website" />
