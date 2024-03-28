@@ -22,9 +22,9 @@ interface Project {
 
 const projectStatus = [
   { title: 'Not Started', source: Icon.Circle, tintColor: Color.Red }, 
-  { title: 'Ongoing',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
-  {  title: 'Maintenance', source: Icon.CircleProgress75, tintColor: Color.Blue },
-  {  title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
+  { title: 'In Progress',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
+  { title: 'Maintenance', source: Icon.CircleProgress75, tintColor: Color.Blue },
+  { title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
 ];
 
 export default function Command() {
@@ -65,17 +65,22 @@ export default function Command() {
 
   const getStatusIcon = (status: string): { source: Icon; tintColor?: Color } => {
     const statusIcons: { [key: string]: { source: Icon; tintColor?: Color } } = {
-      "Not Started": { source: Icon.Circle, tintColor: Color.Red },
-      "Ongoing": { source: Icon.CircleProgress25, tintColor: Color.Yellow },
-      "Completed": { source: Icon.CircleProgress100, tintColor: Color.Green },
-      "Maintenance": { source: Icon.CircleProgress75, tintColor: Color.Blue },
+      ...projectStatus.reduce((icons, { title, source, tintColor }) => {
+        icons[title] = { source, tintColor };
+        return icons;
+      }, {} as { [key: string]: { source: Icon; tintColor?: Color } }), // Add index signature
     };
+    
     return statusIcons[status] || { source: Icon.Circle };
   };
 
 
   return (
-    <List isShowingDetail
+    <List
+      isShowingDetail
+      searchBarPlaceholder="Search Projects by Name or Status"
+      filtering={{ keepSectionOrder: true }}
+      throttle
       actions={
         <ActionPanel>
           <CreateTodoAction onCreate={handleCreate} />
@@ -88,6 +93,7 @@ export default function Command() {
           icon={getStatusIcon(todo.status ?? "")}
           title={todo.title}
           subtitle={todo.url}
+          keywords={todo.status ? [todo.title, todo.status] : [todo.title]}
           detail={
             <List.Item.Detail
               markdown={todo.description}
