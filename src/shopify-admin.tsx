@@ -1,6 +1,6 @@
 /**
  * Project
- * 1. Create Shortcut to open repo, website, kanban
+ * 1. Create Shortcut to open repo, website, roadmap
  * 2. Add validation (Required fields for Title, url)
  * 3. Add local storage to save the projects ✅
  * 4. Add a way to edit the todo ✅
@@ -17,7 +17,8 @@ interface Project {
   status?: string;
   website?: string;
   repo?: string;
-  kanban?: string;
+  roadmap?: string;
+  design?: string;
 }
 
 const projectStatus = [
@@ -74,7 +75,6 @@ export default function Command() {
     return statusIcons[status] || { source: Icon.Circle };
   };
 
-
   return (
     <List
       isShowingDetail
@@ -92,7 +92,6 @@ export default function Command() {
           key={index}
           icon={getStatusIcon(todo.status ?? "")}
           title={todo.title}
-          subtitle={todo.url}
           keywords={todo.status ? [todo.title, todo.status] : [todo.title]}
           detail={
             <List.Item.Detail
@@ -100,38 +99,60 @@ export default function Command() {
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.TagList title="Status">
-                    <List.Item.Detail.Metadata.TagList.Item text={todo.status} color={
-                      todo.status === "Not Started"
-                        ? Color.Red
-                        : todo.status === "Ongoing"
-                        ? Color.Yellow
-                        : todo.status === "Completed"
-                        ? Color.Green
-                        : todo.status === "Maintenance"
-                        ? Color.Blue
-                        : null
-                    } />
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={todo.status}
+                      color={getStatusIcon(todo.status ?? "").tintColor}
+                    />
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Shopify Website" icon="pokemon_types/poison.svg" text="Poison" />
-                  <List.Item.Detail.Metadata.Label title="Repo" icon="pokemon_types/poison.svg" text="Poison" />
+                  {todo.website ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Website"
+                      target={todo.website}
+                      text="Visit Website"
+                    />
+                    : null
+                  }
+                  
+                  {todo.repo ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Repository"
+                      target={todo.repo || ""}
+                      text="Visit Repository"
+                    />
+                    : null
+                  }
+                  
+                  {todo.roadmap ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Roadmap"
+                      target={todo.roadmap || ""}
+                      text="Visit Roadmap"
+                    />
+                    : null
+                  }
+                  {todo.design ? 
                   <List.Item.Detail.Metadata.Link
-                    title="kanban"
-                    target={todo.kanban || ""}
-                    text={todo.kanban || "No kanban link"}
+                    title="Design"
+                    target={todo.design || ""}
+                    text="Visit Design Files"
                   />
+                    : null
+                  }
                 </List.Item.Detail.Metadata>
               }
             />
           }
           actions={
             <ActionPanel>
-              <ActionPanel.Section>
-                <Action.OpenInBrowser
-                  url={`https://admin.shopify.com/store/${todo.url}/`}
-                  title="Open Shopify Admin in Browser"
-                />
-              </ActionPanel.Section>
+                { todo.url ?  
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    url={`${todo.url}/`}
+                    title="Open Shopify Admin in Browser"
+                  />  
+                  </ActionPanel.Section>
+                : null }
               <ActionPanel.Section>
                 <CreateTodoAction onCreate={handleCreate} />
                 <EditTodoAction onEdit={handleEdit} todo={todo} index={index} />
@@ -155,7 +176,8 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
     description: string, 
     website: string, 
     repo: string, 
-    kanban: string, 
+    roadmap: string,
+    design: string,
   }) {
     props.onCreate({ 
       title: values.title, 
@@ -164,7 +186,8 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       description: values.description, 
       website: values.website, 
       repo: values.repo, 
-      kanban: values.kanban, 
+      roadmap: values.roadmap, 
+      design: values.design, 
     });
     pop();
   }
@@ -178,7 +201,8 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       }
     >
       <Form.TextField id="title" title="Title" placeholder="project name"/>
-      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/..." />
+      <Form.TextField id="url" title="Shopify Partner Portal" placeholder="https://admin.shopify.com/store/..." />
+      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" />
       <Form.Dropdown id="status" title="Status" defaultValue={projectStatus[0].title}>
         {projectStatus.map((status, index) => (
           <Form.Dropdown.Item
@@ -188,11 +212,11 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
           />
         ))}
         </Form.Dropdown>
-      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)"/>
       <Form.Separator />
-      <Form.TextField id="website" title="Shopify Website" placeholder="official website"/>
-      <Form.TextField id="repo" title="Repo" placeholder="repo, gitlab, bitbucket..."/>
-      <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable"/>
+      <Form.TextField id="website" title="Website" placeholder="Live website url"/>
+      <Form.TextField id="repo" title="Repo" placeholder="Github, Gitlab, Bitbucket..."/>
+      <Form.TextField id="roadmap" title="Roadmap" placeholder="Jira, Linear, Notion, Monday..."/>
+      <Form.TextField id="desgin" title="Design" placeholder="Figma, Zepplin..."/>
     </Form>
   );
 }
@@ -233,7 +257,8 @@ function EditTodoForm(props: {
     description: string, 
     website: string, 
     repo: string, 
-    kanban: string, 
+    roadmap: string, 
+    design: string
   }) {
     props.onEdit(props.index, { 
       title: values.title, 
@@ -242,7 +267,8 @@ function EditTodoForm(props: {
       description: values.description, 
       website: values.website, 
       repo: values.repo, 
-      kanban: values.kanban, 
+      roadmap: values.roadmap, 
+      design: values.design
     });
     pop();
   }
@@ -255,8 +281,7 @@ function EditTodoForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.todo.title}/>
-      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/" defaultValue={props.todo.url} />
+      <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.todo.title} />
       <Form.Dropdown 
         id="status" 
         title="Status" 
@@ -271,11 +296,13 @@ function EditTodoForm(props: {
           />
         ))}
       </Form.Dropdown>
+      <Form.TextField id="url" title="Shopify Partner Portal" placeholder="https://admin.shopify.com/store/" defaultValue={props.todo.url} />
       <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.todo.description}/>
       <Form.Separator />
-      <Form.TextField id="website" title="Shopify Website" placeholder="official website" defaultValue={props.todo.website}/>
+      <Form.TextField id="website" title="Website" placeholder="official website" defaultValue={props.todo.website}/>
       <Form.TextField id="repo" title="Repo" placeholder="repo, gitlab, bitbucket..." defaultValue={props.todo.repo}/>
-      <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.kanban}/>
+      <Form.TextField id="roadmap" title="Roadmap" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.roadmap}/>
+      <Form.TextField id="design" title="Design" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.design}/>
     </Form>
   );
 }
