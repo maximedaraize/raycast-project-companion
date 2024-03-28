@@ -1,6 +1,6 @@
 /**
  * Project
- * 1. Create Shortcut to open github, website, kanban
+ * 1. Create Shortcut to open repo, website, kanban
  * 2. Add validation (Required fields for Title, url)
  * 3. Add local storage to save the projects ✅
  * 4. Add a way to edit the todo ✅
@@ -16,7 +16,7 @@ interface Project {
   description?: string;
   status?: string;
   website?: string;
-  github?: string;
+  repo?: string;
   kanban?: string;
 }
 
@@ -114,7 +114,7 @@ export default function Command() {
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label title="Shopify Website" icon="pokemon_types/poison.svg" text="Poison" />
-                  <List.Item.Detail.Metadata.Label title="Github" icon="pokemon_types/poison.svg" text="Poison" />
+                  <List.Item.Detail.Metadata.Label title="Repo" icon="pokemon_types/poison.svg" text="Poison" />
                   <List.Item.Detail.Metadata.Link
                     title="kanban"
                     target={todo.kanban || ""}
@@ -154,7 +154,7 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
     url: string,
     description: string, 
     website: string, 
-    github: string, 
+    repo: string, 
     kanban: string, 
   }) {
     props.onCreate({ 
@@ -163,7 +163,7 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       url: values.url, 
       description: values.description, 
       website: values.website, 
-      github: values.github, 
+      repo: values.repo, 
       kanban: values.kanban, 
     });
     pop();
@@ -191,7 +191,7 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)"/>
       <Form.Separator />
       <Form.TextField id="website" title="Shopify Website" placeholder="official website"/>
-      <Form.TextField id="github" title="Github" placeholder="github, gitlab, bitbucket..."/>
+      <Form.TextField id="repo" title="Repo" placeholder="repo, gitlab, bitbucket..."/>
       <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable"/>
     </Form>
   );
@@ -232,7 +232,7 @@ function EditTodoForm(props: {
     url: string,
     description: string, 
     website: string, 
-    github: string, 
+    repo: string, 
     kanban: string, 
   }) {
     props.onEdit(props.index, { 
@@ -241,7 +241,7 @@ function EditTodoForm(props: {
       url: values.url, 
       description: values.description, 
       website: values.website, 
-      github: values.github, 
+      repo: values.repo, 
       kanban: values.kanban, 
     });
     pop();
@@ -274,7 +274,7 @@ function EditTodoForm(props: {
       <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.todo.description}/>
       <Form.Separator />
       <Form.TextField id="website" title="Shopify Website" placeholder="official website" defaultValue={props.todo.website}/>
-      <Form.TextField id="github" title="Github" placeholder="github, gitlab, bitbucket..." defaultValue={props.todo.github}/>
+      <Form.TextField id="repo" title="Repo" placeholder="repo, gitlab, bitbucket..." defaultValue={props.todo.repo}/>
       <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.kanban}/>
     </Form>
   );
