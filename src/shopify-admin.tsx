@@ -88,9 +88,13 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser url={`https://admin.shopify.com/store/${todo.url}/`} title="Open in Browser" />
+                <Action.OpenInBrowser
+                  url={`https://admin.shopify.com/store/${todo.url}/`}
+                  title="Open in Browser"
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
+                <CreateTodoAction onCreate={handleCreate} />
                 <EditTodoAction onEdit={handleEdit} todo={todo} index={index} />
                 <DeleteTodoAction onDelete={() => handleDelete(index)} />
               </ActionPanel.Section>
@@ -157,7 +161,7 @@ function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
     <Action.Push
       icon={Icon.Pencil}
       title="Create Todo"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
       target={<CreateTodoForm onCreate={props.onCreate} />}
     />
   );
@@ -168,7 +172,7 @@ function DeleteTodoAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Todo"
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
       onAction={props.onDelete}
     />
   );
@@ -241,7 +245,7 @@ function EditTodoAction(props: {
     <Action.Push
       icon={Icon.Pill}
       title="Edit Todo"
-      shortcut={{ modifiers: ["ctrl"], key: "e" }}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
       target={<EditTodoForm onEdit={props.onEdit} todo={props.todo} index={props.index}/>}
     />
   );
