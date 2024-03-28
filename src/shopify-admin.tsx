@@ -1,7 +1,7 @@
 /**
  * Project
- * 1. Create Shortcut to open repo, website, roadmap
- * 2. Add validation (Required fields for Title, url)
+ * 1. Create Shortcut to open repo, website, roadmap 🔴
+ * 2. Add validation (Required fields for Title, url) ✅
  * 3. Add local storage to save the projects ✅
  * 4. Add a way to edit the todo ✅
  * 5. Add List.EmptyView State
@@ -109,7 +109,11 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Link
                       title="Website"
                       target={todo.website}
-                      text="Visit Website"
+                      text={
+                        todo.website.length > 32
+                        ? todo.website.substring(0, 32) + '...'
+                        : todo.website
+                      }
                     />
                     : null
                   }
@@ -118,7 +122,11 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Link
                       title="Repository"
                       target={todo.repo || ""}
-                      text="Visit Repository"
+                      text={
+                        todo.repo.length > 32
+                        ? todo.repo.substring(0, 32) + '...'
+                        : todo.repo
+                      }
                     />
                     : null
                   }
@@ -127,15 +135,23 @@ export default function Command() {
                     <List.Item.Detail.Metadata.Link
                       title="Roadmap"
                       target={todo.roadmap || ""}
-                      text="Visit Roadmap"
+                      text={
+                        todo.roadmap.length > 32
+                        ? todo.roadmap.substring(0, 32) + '...'
+                        : todo.roadmap
+                      }
                     />
                     : null
                   }
                   {todo.design ? 
                   <List.Item.Detail.Metadata.Link
-                    title="Design"
+                    title="Design Files"
                     target={todo.design || ""}
-                    text="Visit Design Files"
+                    text={
+                        todo.design.length > 32
+                        ? todo.design.substring(0, 32) + '...'
+                        : todo.design
+                      }
                   />
                     : null
                   }
@@ -216,7 +232,7 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       <Form.TextField id="website" title="Website" placeholder="Live website url"/>
       <Form.TextField id="repo" title="Repo" placeholder="Github, Gitlab, Bitbucket..."/>
       <Form.TextField id="roadmap" title="Roadmap" placeholder="Jira, Linear, Notion, Monday..."/>
-      <Form.TextField id="desgin" title="Design" placeholder="Figma, Zepplin..."/>
+      <Form.TextField id="desgin" title="Design" placeholder="Figma, Sketch..."/>
     </Form>
   );
 }
