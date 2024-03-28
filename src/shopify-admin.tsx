@@ -1,16 +1,16 @@
 /**
- * Todo
+ * Project
  * 1. Create Shortcut to open github, website, kanban
  * 2. Add validation (Required fields for Title, url)
- * 3. Add local storage to save the todos
+ * 3. Add local storage to save the projects ✅
  * 4. Add a way to edit the todo ✅
  * 5. Add List.EmptyView State
  */
 
-import { Action, ActionPanel, Form, Icon, List, useNavigation, Color} from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage } from "@raycast/api";
+import { useState, useEffect } from "react";
 
-interface Todo {
+interface Project {
   title: string;
   url?: string;
   description?: string;
@@ -20,26 +20,59 @@ interface Todo {
   kanban?: string;
 }
 
+const projectStatus = [
+  { title: 'Not Started', source: Icon.Circle, tintColor: Color.Red }, 
+  { title: 'Ongoing',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
+  {  title: 'Maintenance', source: Icon.CircleProgress75, tintColor: Color.Blue },
+  {  title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
+];
+
 export default function Command() {
   
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  function handleCreate(todo: Todo) {
-    const newTodos = [...todos, todo];
-    setTodos(newTodos);
+  useEffect(() => {
+    const fetchStoredTodos = async () => {
+      const storedTodos = await LocalStorage.getItem<string>("projects");
+      if (storedTodos) {
+        setProjects(JSON.parse(storedTodos));
+      }
+    };
+
+    fetchStoredTodos();
+  }, []);
+
+  useEffect(() => {
+    LocalStorage.setItem("projects", JSON.stringify(projects));
+  }, [projects]);
+
+  function handleCreate(todo: Project) {
+    const newTodos = [...projects, todo];
+    setProjects(newTodos);
   }
 
   function handleDelete(index: number) {
-    const newTodos = [...todos];
+    const newTodos = [...projects];
     newTodos.splice(index, 1);
-    setTodos(newTodos);
+    setProjects(newTodos);
   }
 
-  function handleEdit(index: number, editedTodo: Todo) {
-    const updatedTodos = [...todos];
+  function handleEdit(index: number, editedTodo: Project) {
+    const updatedTodos = [...projects];
     updatedTodos[index] = editedTodo;
-    setTodos(updatedTodos);
+    setProjects(updatedTodos);
   }
+
+  const getStatusIcon = (status: string): { source: Icon; tintColor?: Color } => {
+    const statusIcons: { [key: string]: { source: Icon; tintColor?: Color } } = {
+      "Not Started": { source: Icon.Circle, tintColor: Color.Red },
+      "Ongoing": { source: Icon.CircleProgress25, tintColor: Color.Yellow },
+      "Completed": { source: Icon.CircleProgress100, tintColor: Color.Green },
+      "Maintenance": { source: Icon.CircleProgress75, tintColor: Color.Blue },
+    };
+    return statusIcons[status] || { source: Icon.Circle };
+  };
+
 
   return (
     <List isShowingDetail
@@ -49,10 +82,10 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {todos.map((todo, index) => (
+      {projects.map((todo, index) => (
         <List.Item
           key={index}
-          icon={Icon.Circle}
+          icon={getStatusIcon(todo.status ?? "")}
           title={todo.title}
           subtitle={todo.url}
           detail={
@@ -90,7 +123,7 @@ export default function Command() {
               <ActionPanel.Section>
                 <Action.OpenInBrowser
                   url={`https://admin.shopify.com/store/${todo.url}/`}
-                  title="Open in Browser"
+                  title="Open Shopify Admin in Browser"
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
@@ -106,7 +139,7 @@ export default function Command() {
   );
 }
 
-function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
+function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
   const { pop } = useNavigation();
 
   function handleSubmit(values: { 
@@ -134,33 +167,35 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title"/>
-      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/..." value="https://admin.shopify.com/store/" />
-      <Form.Dropdown id="status" title="Status"
-      defaultValue="Not Started">
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Red }} title="Not Started" value="Not Started" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Yellow }} title="Ongoing" value="Ongoing" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Green }} title="Completed" value="Completed" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Blue }} title="Maintenace" value="Maintenace" />
+      <Form.TextField id="title" title="Title" placeholder="project name"/>
+      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/..." />
+      <Form.Dropdown id="status" title="Status" defaultValue={projectStatus[0].title}>
+        {projectStatus.map((status, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            icon={{ source: status.source, tintColor: status.tintColor }} 
+            title={status.title} value={status.title}
+          />
+        ))}
         </Form.Dropdown>
-      <Form.TextArea id="description" title="Project Description" />
+      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)"/>
       <Form.Separator />
-      <Form.TextField id="website" title="Shopify Website" />
-      <Form.TextField id="github" title="Github" />
-      <Form.TextField id="kanban" title="Kanban" />
+      <Form.TextField id="website" title="Shopify Website" placeholder="official website"/>
+      <Form.TextField id="github" title="Github" placeholder="github, gitlab, bitbucket..."/>
+      <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable"/>
     </Form>
   );
 }
 
-function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
+function CreateTodoAction(props: { onCreate: (todo: Project) => void }) {
   return (
     <Action.Push
-      icon={Icon.Pencil}
-      title="Create Todo"
+      icon={Icon.Document}
+      title="Create Project"
       shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
       target={<CreateTodoForm onCreate={props.onCreate} />}
     />
@@ -171,7 +206,7 @@ function DeleteTodoAction(props: { onDelete: () => void }) {
   return (
     <Action
       icon={Icon.Trash}
-      title="Delete Todo"
+      title="Delete Project"
       shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
       onAction={props.onDelete}
     />
@@ -179,8 +214,8 @@ function DeleteTodoAction(props: { onDelete: () => void }) {
 }
 
 function EditTodoForm(props: { 
-  onEdit: (index: number, todo: Todo) => void,
-  todo: Todo,
+  onEdit: (index: number, todo: Project) => void,
+  todo: Project,
   index: number,
 }) {
   const { pop } = useNavigation();
@@ -210,41 +245,44 @@ function EditTodoForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" defaultValue={props.todo.title}/>
-      <Form.TextField id="url" title="Admin Portal" defaultValue={`https://admin.shopify.com/store/${props.todo.url}`} />
+      <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.todo.title}/>
+      <Form.TextField id="url" title="Admin Portal" placeholder="https://admin.shopify.com/store/" defaultValue={props.todo.url} />
       <Form.Dropdown 
         id="status" 
         title="Status" 
         defaultValue={props.todo.status}
         storeValue
       >
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Red }} title="Not Started" value="Not Started" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Yellow }} title="Ongoing" value="Ongoing" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Green }} title="Completed" value="Completed" />
-        <Form.Dropdown.Item icon={{ source: Icon.Circle, tintColor: Color.Blue }} title="Maintenance" value="Maintenance" />
+        {projectStatus.map((status, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            icon={{ source: status.source, tintColor: status.tintColor }} 
+            title={status.title} value={status.title}
+          />
+        ))}
       </Form.Dropdown>
-      <Form.TextArea id="description" title="Project Description" defaultValue={props.todo.description}/>
+      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.todo.description}/>
       <Form.Separator />
-      <Form.TextField id="website" title="Shopify Website" defaultValue={props.todo.website}/>
-      <Form.TextField id="github" title="Github" defaultValue={props.todo.github}/>
-      <Form.TextField id="kanban" title="Kanban" defaultValue={props.todo.kanban}/>
+      <Form.TextField id="website" title="Shopify Website" placeholder="official website" defaultValue={props.todo.website}/>
+      <Form.TextField id="github" title="Github" placeholder="github, gitlab, bitbucket..." defaultValue={props.todo.github}/>
+      <Form.TextField id="kanban" title="Kanban" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.kanban}/>
     </Form>
   );
 }
 
 function EditTodoAction(props: { 
-  onEdit: (index: number, todo: Todo) => void, 
-  todo: Todo, 
+  onEdit: (index: number, todo: Project) => void, 
+  todo: Project, 
   index: number 
 }) {
   return (
     <Action.Push
-      icon={Icon.Pill}
-      title="Edit Todo"
+      icon={Icon.Pencil}
+      title="Edit Project"
       shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
       target={<EditTodoForm onEdit={props.onEdit} todo={props.todo} index={props.index}/>}
     />
