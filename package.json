@@ -14,9 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "project manager assistant",
-      "subtitle": "Manage all your projects",
-      "description": "create, update, delete, list all your projects",
+      "title": "Manage Projects",
+      "subtitle": "Create, update, delete, search all your projects",
+      "description": "Extension allowing you to add, update, delete and search information about your projects",
       "mode": "view"
     }
   ],
