@@ -1,119 +1,383 @@
-import { useCallback, useEffect, useState } from "react";
-import { nanoid } from "nanoid";
-import { ActionPanel, Icon, List, LocalStorage } from "@raycast/api";
-import { Filter, Todo } from "./types";
-import CreateTodoAction  from "./components/CreateTodoAction";
-import DeleteTodoAction  from "./components/DeleteTodoAction";
-import  EmptyView from "./components/EmptyView";
-import ToggleTodoAction from "./components/ToggleTodoAction";
+import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage } from "@raycast/api";
+import { useState, useEffect } from "react";
+
+interface Project {
+  title: string;
+  description?: string;
+  status?: string;
+  website?: string;
+  backend?: string;
+  repo?: string;
+  roadmap?: string;
+  design?: string;
+  favorite?: string;
+}
+
+const projectStatus = [
+  { title: 'Backlog', source: Icon.Circle, tintColor: Color.PrimaryText }, 
+  { title: 'In Progress',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
+  { title: 'Paused',  source: Icon.CircleProgress50, tintColor: Color.Orange }, 
+  { title: 'In Review', source: Icon.CircleProgress75, tintColor: Color.Blue },
+  { title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
+  { title: 'Maintenance', source: Icon.CircleEllipsis, tintColor: Color.Magenta },
+  { title: 'Blocked',  source: Icon.Stop, tintColor: Color.Red }, 
+];
+
+const externalLink = [
+  { id: 'website', placeholder: 'Live website url'}, 
+  { id: 'backend', placeholder: 'shopify, sanity, wordpress, contentful...'}, 
+  { id: 'repo',  placeholder: 'Github, Gitlab, Bitbucket...'}, 
+  { id: 'roadmap', placeholder: 'Jira, Linear, Notion, Monday...'},
+  { id: 'design', placeholder: 'Figma, Sketch...'},
+  { id: 'extra',  placeholder: 'Any other useful link'}, 
+];
 
 export default function Command() {
-  const [state, setState] = useState<State>({
-    filter: Filter.All,
-    isLoading: true,
-    searchText: "",
-    todos: [],
-    visibleTodos: [],
-  });
+  
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    (async () => {
-      const storedTodos = await LocalStorage.getItem<string>("todos");
-
-      if (!storedTodos) {
-        setState((previous) => ({ ...previous, isLoading: false }));
-        return;
+    const fetchStoredProjects = async () => {
+      const storedProjects = await LocalStorage.getItem<string>("projects");
+      if (storedProjects) {
+        setProjects(JSON.parse(storedProjects));
       }
-
-      try {
-        const todos: Todo[] = JSON.parse(storedTodos);
-        setState((previous) => ({ ...previous, todos, isLoading: false }));
-      } catch (e) {
-        // can't decode todos
-        setState((previous) => ({ ...previous, todos: [], isLoading: false }));
-      }
-    })();
+    };
+    fetchStoredProjects();
   }, []);
 
   useEffect(() => {
-    LocalStorage.setItem("todos", JSON.stringify(state.todos));
-  }, [state.todos]);
+    LocalStorage.setItem("projects", JSON.stringify(projects));
+  }, [projects]);
 
-  const handleCreate = useCallback(
-    (title: string) => {
-      const newTodos = [...state.todos, { id: nanoid(), title, isCompleted: false }];
-      setState((previous) => ({ ...previous, todos: newTodos, filter: Filter.All, searchText: "" }));
-    },
-    [state.todos, setState]
-  );
+  function handleCreate(project: Project) {
+    const newProjects = [...projects, project];
+    setProjects(newProjects);
+  }
 
-  const handleToggle = useCallback(
-    (index: number) => {
-      const newTodos = [...state.todos];
-      newTodos[index].isCompleted = !newTodos[index].isCompleted;
-      setState((previous) => ({ ...previous, todos: newTodos }));
-    },
-    [state.todos, setState]
-  );
+  function handleDelete(index: number) {
+    const newProjects = [...projects];
+    newProjects.splice(index, 1);
+    setProjects(newProjects);
+  }
 
-  const handleDelete = useCallback(
-    (index: number) => {
-      const newTodos = [...state.todos];
-      newTodos.splice(index, 1);
-      setState((previous) => ({ ...previous, todos: newTodos }));
-    },
-    [state.todos, setState]
-  );
+  function handleEdit(index: number, editedProject: Project) {
+    const updatedProjects = [...projects];
+    updatedProjects[index] = editedProject;
+    setProjects(updatedProjects);
+  }
 
-  const filterTodos = useCallback(() => {
-    if (state.filter === Filter.Open) {
-      return state.todos.filter((todo) => !todo.isCompleted);
-    }
-    if (state.filter === Filter.Completed) {
-      return state.todos.filter((todo) => todo.isCompleted);
-    }
-    return state.todos;
-  }, [state.todos, state.filter]);
+  const getStatusIcon = (status: string): { source: Icon; tintColor?: Color } => {
+    const statusIcons: { [key: string]: { source: Icon; tintColor?: Color } } = {
+      ...projectStatus.reduce((icons, { title, source, tintColor }) => {
+        icons[title] = { source, tintColor };
+        return icons;
+      }, {} as { [key: string]: { source: Icon; tintColor?: Color } }), // Add index signature
+    };
+    
+    return statusIcons[status] || { source: Icon.Circle };
+  };
 
   return (
     <List
-      isLoading={state.isLoading}
-      searchText={state.searchText}
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Todo List"
-          value={state.filter}
-          onChange={(newValue) => setState((previous) => ({ ...previous, filter: newValue as Filter }))}
-        >
-          <List.Dropdown.Item title="All" value={Filter.All} />
-          <List.Dropdown.Item title="Open" value={Filter.Open} />
-          <List.Dropdown.Item title="Completed" value={Filter.Completed} />
-        </List.Dropdown>
+      isShowingDetail
+      searchBarPlaceholder="Search projects by name or status"
+      filtering={{ keepSectionOrder: true }}
+      throttle
+      actions={
+        <ActionPanel>
+          <CreateProjectAction onCreate={handleCreate} />
+        </ActionPanel>
       }
-      enableFiltering
-      onSearchTextChange={(newValue) => {
-        setState((previous) => ({ ...previous, searchText: newValue }));
-      }}
     >
-      <EmptyView filter={state.filter} todos={filterTodos()} searchText={state.searchText} onCreate={handleCreate} />
-      {filterTodos().map((todo, index) => (
+      {projects.map((project, index) => (
         <List.Item
-          key={todo.id}
-          icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
-          title={todo.title}
+          key={index}
+          icon={getStatusIcon(project.status ?? "")}
+          title={project.title}
+          keywords={project.status ? [project.title, project.status] : [project.title]}
+          detail={
+            <List.Item.Detail
+              markdown={project.description}
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.TagList title="Status">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={project.status}
+                      color={getStatusIcon(project.status ?? "").tintColor}
+                    />
+                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Separator />
+                  {project.website ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Website"
+                      target={project.website}
+                      text={
+                        project.website.length > 32
+                        ? project.website.substring(0, 32) + '...'
+                        : project.website
+                      }
+                    />
+                    : null
+                  }
+                  {project.backend ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Backend"
+                      target={project.backend}
+                      text={
+                        project.backend.length > 32
+                        ? project.backend.substring(0, 32) + '...'
+                        : project.backend
+                      }
+                    />
+                    : null
+                  }
+                  
+                  {project.repo ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Repository"
+                      target={project.repo || ""}
+                      text={
+                        project.repo.length > 32
+                        ? project.repo.substring(0, 32) + '...'
+                        : project.repo
+                      }
+                    />
+                    : null
+                  }
+                  
+                  {project.roadmap ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Roadmap"
+                      target={project.roadmap || ""}
+                      text={
+                        project.roadmap.length > 32
+                        ? project.roadmap.substring(0, 32) + '...'
+                        : project.roadmap
+                      }
+                    />
+                    : null
+                  }
+                  {project.design ? 
+                  <List.Item.Detail.Metadata.Link
+                    title="Design Files"
+                    target={project.design || ""}
+                    text={
+                        project.design.length > 32
+                        ? project.design.substring(0, 32) + '...'
+                        : project.design
+                      }
+                  />
+                    : null
+                  }
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
           actions={
             <ActionPanel>
+                { project.favorite ?  
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser
+                    url={project[`${project.favorite}` as keyof Project] ?? ""}
+                    title={`Open ${project.favorite} in Browser`}
+                  />  
+                  </ActionPanel.Section>
+                : null }
               <ActionPanel.Section>
-                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <CreateTodoAction onCreate={handleCreate} />
-                <DeleteTodoAction onDelete={() => handleDelete(index)} />
+                <CreateProjectAction onCreate={handleCreate} />
+                <EditProjectAction onEdit={handleEdit} project={project} index={index} />
+                <DeleteProjectAction onDelete={() => handleDelete(index)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
     </List>
+  );
+}
+
+function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
+  const { pop } = useNavigation();
+
+  function handleSubmit(values: { 
+    title: string, 
+    status: string, 
+    backend: string,
+    description: string, 
+    website: string, 
+    repo: string, 
+    roadmap: string,
+    design: string,
+    favorite: string
+  }) {
+    props.onCreate({ 
+      title: values.title, 
+      status: values.status, 
+      backend: values.backend, 
+      description: values.description, 
+      website: values.website, 
+      repo: values.repo, 
+      roadmap: values.roadmap, 
+      design: values.design,
+      favorite: values.favorite
+    });
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Create Project" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" placeholder="project name"/>
+      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" />
+      <Form.Dropdown id="status" title="Status" defaultValue={projectStatus[0].title}>
+        {projectStatus.map((status, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            icon={{ source: status.source, tintColor: status.tintColor }} 
+            title={status.title} value={status.title}
+          />
+        ))}
+        </Form.Dropdown>
+      <Form.Separator />
+      {externalLink.map((link, index) => (
+        <Form.TextField
+          key={index}
+          id={link.id}
+          title={link.id.charAt(0).toUpperCase() + link.id.slice(1)}
+          placeholder={link.placeholder}
+        />
+      ))}
+      <Form.Dropdown id="favorite" title="Quick Open" defaultValue={externalLink[0].id}>
+        {externalLink.map((link, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            title={link.id}
+            value={link.id}
+          />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
+function CreateProjectAction(props: { onCreate: (project: Project) => void }) {
+  return (
+    <Action.Push
+      icon={Icon.Document}
+      title="Create Project"
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      target={<CreateProjectForm onCreate={props.onCreate} />}
+    />
+  );
+}
+
+function DeleteProjectAction(props: { onDelete: () => void }) {
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Delete Project"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
+      onAction={props.onDelete}
+    />
+  );
+}
+
+function EditProjectForm(props: { 
+  onEdit: (index: number, project: Project) => void,
+  project: Project,
+  index: number,
+}) {
+  const { pop } = useNavigation();
+
+  function handleSubmit(values: { 
+    title: string, 
+    status: string, 
+    backend: string,
+    description: string, 
+    website: string, 
+    repo: string, 
+    roadmap: string, 
+    design: string
+    favorite: string
+  }) {
+    props.onEdit(props.index, { 
+      title: values.title, 
+      status: values.status, 
+      backend: values.backend, 
+      description: values.description, 
+      website: values.website, 
+      repo: values.repo, 
+      roadmap: values.roadmap, 
+      design: values.design,
+      favorite: values.favorite
+    });
+    pop();
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.project.title} />
+      <Form.Dropdown 
+        id="status" 
+        title="Status" 
+        defaultValue={props.project.status}
+        storeValue
+      >
+        {projectStatus.map((status, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            icon={{ source: status.source, tintColor: status.tintColor }} 
+            title={status.title} value={status.title}
+          />
+        ))}
+      </Form.Dropdown>
+      
+      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.project.description}/>
+      <Form.Separator />
+      {externalLink.map((link, index) => (
+        <Form.TextField
+          key={index}
+          id={link.id}
+          title={link.id.charAt(0).toUpperCase() + link.id.slice(1)}
+          placeholder={link.placeholder}
+          defaultValue={props.project[link.id as keyof Project]}
+        />
+      ))}
+      <Form.Dropdown id="favorite" title="Quick Open" defaultValue={props.project.favorite}>
+        {externalLink.map((link, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            title={link.id} value={link.id}
+          />
+        ))}
+      </Form.Dropdown>
+    </Form>
+  );
+}
+
+function EditProjectAction(props: { 
+  onEdit: (index: number, project: Project) => void, 
+  project: Project, 
+  index: number 
+}) {
+  return (
+    <Action.Push
+      icon={Icon.Pencil}
+      title="Edit Project"
+      shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+      target={<EditProjectForm onEdit={props.onEdit} project={props.project} index={props.index}/>}
+    />
   );
 }
