@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "shopify-admin",
-      "title": "shopify admin",
-      "subtitle": "List all Shopify admin",
+      "title": "project manager assistant",
+      "subtitle": "Manage all your projects",
       "description": "open the list of all shopify admins",
       "mode": "view"
     }
