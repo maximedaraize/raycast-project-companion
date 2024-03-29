@@ -3,7 +3,7 @@
   "name": "shopify-admin-search",
   "title": "Shopify Admin Search",
   "description": "Categorize and search Shopify Admin Account",
-  "icon": "command-icon.png",
+  "icon": "command-logo.png",
   "author": "maximedaraize",
   "categories": [
     "Developer Tools",
