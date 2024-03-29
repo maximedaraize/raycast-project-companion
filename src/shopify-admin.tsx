@@ -22,10 +22,12 @@ interface Project {
 }
 
 const projectStatus = [
-  { title: 'Not Started', source: Icon.Circle, tintColor: Color.Red }, 
+  { title: 'Backlog', source: Icon.Circle, tintColor: Color.PrimaryText }, 
   { title: 'In Progress',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
-  { title: 'Maintenance', source: Icon.CircleProgress75, tintColor: Color.Blue },
+  { title: 'Paused',  source: Icon.CircleProgress50, tintColor: Color.Orange }, 
+  { title: 'In Review', source: Icon.CircleProgress75, tintColor: Color.Blue },
   { title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
+  { title: 'Blocked',  source: Icon.Stop, tintColor: Color.Red }, 
 ];
 
 export default function Command() {
