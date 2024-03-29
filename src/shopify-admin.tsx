@@ -12,13 +12,14 @@ import { useState, useEffect } from "react";
 
 interface Project {
   title: string;
-  url?: string;
   description?: string;
   status?: string;
   website?: string;
+  backend?: string;
   repo?: string;
   roadmap?: string;
   design?: string;
+  favorite?: string;
 }
 
 const projectStatus = [
@@ -27,7 +28,17 @@ const projectStatus = [
   { title: 'Paused',  source: Icon.CircleProgress50, tintColor: Color.Orange }, 
   { title: 'In Review', source: Icon.CircleProgress75, tintColor: Color.Blue },
   { title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
+  { title: 'Maintenance', source: Icon.CircleEllipsis, tintColor: Color.Magenta },
   { title: 'Blocked',  source: Icon.Stop, tintColor: Color.Red }, 
+];
+
+const externalLink = [
+  { id: 'website', placeholder: 'Live website url'}, 
+  { id: 'backend', placeholder: 'shopify, sanity, wordpress, contentful...'}, 
+  { id: 'repo',  placeholder: 'Github, Gitlab, Bitbucket...'}, 
+  { id: 'roadmap', placeholder: 'Jira, Linear, Notion, Monday...'},
+  { id: 'design', placeholder: 'Figma, Sketch...'},
+  { id: 'extra',  placeholder: 'Any other useful link'}, 
 ];
 
 export default function Command() {
@@ -119,6 +130,18 @@ export default function Command() {
                     />
                     : null
                   }
+                  {todo.backend ? 
+                    <List.Item.Detail.Metadata.Link
+                      title="Backend"
+                      target={todo.backend}
+                      text={
+                        todo.backend.length > 32
+                        ? todo.backend.substring(0, 32) + '...'
+                        : todo.backend
+                      }
+                    />
+                    : null
+                  }
                   
                   {todo.repo ? 
                     <List.Item.Detail.Metadata.Link
@@ -163,11 +186,11 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-                { todo.url ?  
+                { todo.favorite ?  
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
-                    url={`${todo.url}/`}
-                    title="Open Shopify Admin in Browser"
+                    url={todo[`${todo.favorite}` as keyof Project] ?? ""}
+                    title={`Open ${todo.favorite} in Browser`}
                   />  
                   </ActionPanel.Section>
                 : null }
@@ -190,22 +213,24 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
   function handleSubmit(values: { 
     title: string, 
     status: string, 
-    url: string,
+    backend: string,
     description: string, 
     website: string, 
     repo: string, 
     roadmap: string,
     design: string,
+    favorite: string
   }) {
     props.onCreate({ 
       title: values.title, 
       status: values.status, 
-      url: values.url, 
+      backend: values.backend, 
       description: values.description, 
       website: values.website, 
       repo: values.repo, 
       roadmap: values.roadmap, 
-      design: values.design, 
+      design: values.design,
+      favorite: values.favorite
     });
     pop();
   }
@@ -219,7 +244,6 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
       }
     >
       <Form.TextField id="title" title="Title" placeholder="project name"/>
-      <Form.TextField id="url" title="Shopify Partner Portal" placeholder="https://admin.shopify.com/store/..." />
       <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" />
       <Form.Dropdown id="status" title="Status" defaultValue={projectStatus[0].title}>
         {projectStatus.map((status, index) => (
@@ -231,10 +255,23 @@ function CreateTodoForm(props: { onCreate: (todo: Project) => void }) {
         ))}
         </Form.Dropdown>
       <Form.Separator />
-      <Form.TextField id="website" title="Website" placeholder="Live website url"/>
-      <Form.TextField id="repo" title="Repo" placeholder="Github, Gitlab, Bitbucket..."/>
-      <Form.TextField id="roadmap" title="Roadmap" placeholder="Jira, Linear, Notion, Monday..."/>
-      <Form.TextField id="desgin" title="Design" placeholder="Figma, Sketch..."/>
+      {externalLink.map((link, index) => (
+        <Form.TextField
+          key={index}
+          id={link.id}
+          title={link.id.charAt(0).toUpperCase() + link.id.slice(1)}
+          placeholder={link.placeholder}
+        />
+      ))}
+      <Form.Dropdown id="favorite" title="Quick Open" defaultValue={externalLink[0].id}>
+        {externalLink.map((link, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            title={link.id}
+            value={link.id}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }
@@ -244,7 +281,7 @@ function CreateTodoAction(props: { onCreate: (todo: Project) => void }) {
     <Action.Push
       icon={Icon.Document}
       title="Create Project"
-      shortcut={{ modifiers: ["cmd", "opt"], key: "n" }}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
       target={<CreateTodoForm onCreate={props.onCreate} />}
     />
   );
@@ -255,7 +292,7 @@ function DeleteTodoAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Project"
-      shortcut={{ modifiers: ["cmd", "opt"], key: "x" }}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
       onAction={props.onDelete}
     />
   );
@@ -271,22 +308,24 @@ function EditTodoForm(props: {
   function handleSubmit(values: { 
     title: string, 
     status: string, 
-    url: string,
+    backend: string,
     description: string, 
     website: string, 
     repo: string, 
     roadmap: string, 
     design: string
+    favorite: string
   }) {
     props.onEdit(props.index, { 
       title: values.title, 
       status: values.status, 
-      url: values.url, 
+      backend: values.backend, 
       description: values.description, 
       website: values.website, 
       repo: values.repo, 
       roadmap: values.roadmap, 
-      design: values.design
+      design: values.design,
+      favorite: values.favorite
     });
     pop();
   }
@@ -314,13 +353,26 @@ function EditTodoForm(props: {
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField id="url" title="Shopify Partner Portal" placeholder="https://admin.shopify.com/store/" defaultValue={props.todo.url} />
+      
       <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.todo.description}/>
       <Form.Separator />
-      <Form.TextField id="website" title="Website" placeholder="official website" defaultValue={props.todo.website}/>
-      <Form.TextField id="repo" title="Repo" placeholder="repo, gitlab, bitbucket..." defaultValue={props.todo.repo}/>
-      <Form.TextField id="roadmap" title="Roadmap" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.roadmap}/>
-      <Form.TextField id="design" title="Design" placeholder="jira, linear, notion, airtable..." defaultValue={props.todo.design}/>
+      {externalLink.map((link, index) => (
+        <Form.TextField
+          key={index}
+          id={link.id}
+          title={link.id.charAt(0).toUpperCase() + link.id.slice(1)}
+          placeholder={link.placeholder}
+          defaultValue={props.todo[link.id as keyof Project]}
+        />
+      ))}
+      <Form.Dropdown id="favorite" title="Quick Open" defaultValue={props.todo.favorite}>
+        {externalLink.map((link, index) => (
+          <Form.Dropdown.Item
+            key={index}
+            title={link.id} value={link.id}
+          />
+        ))}
+      </Form.Dropdown>
     </Form>
   );
 }
