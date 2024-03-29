@@ -1,3 +1,3 @@
-# Shopify Admin Search Changelog
+# Project Manager Assistant
 
 ## [Initial Version] - 2024-03-13

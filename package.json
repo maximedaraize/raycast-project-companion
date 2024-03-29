@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "shopify-admin-search",
-  "title": "Shopify Admin Search",
-  "description": "Categorize and search Shopify Admin Account",
+  "name": "project-manager-assistant",
+  "title": "Project Manager Assistant",
+  "description": "Manage all your projects",
   "icon": "command-logo.png",
   "author": "maximedaraize",
   "categories": [
@@ -13,16 +13,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "shopify-admin",
+      "name": "index",
       "title": "project manager assistant",
       "subtitle": "Manage all your projects",
-      "description": "open the list of all shopify admins",
+      "description": "create, update, delete, list all your projects",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.0",
-    "nanoid": "^3.3.7"
+    "@raycast/api": "^1.69.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
