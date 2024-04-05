@@ -14,26 +14,25 @@ interface Project {
 }
 
 const projectStatus = [
-  { title: 'Backlog', source: Icon.Circle, tintColor: Color.PrimaryText }, 
-  { title: 'In Progress',  source: Icon.CircleProgress25, tintColor: Color.Yellow }, 
-  { title: 'Paused',  source: Icon.CircleProgress50, tintColor: Color.Orange }, 
-  { title: 'In Review', source: Icon.CircleProgress75, tintColor: Color.Blue },
-  { title: 'Completed', source: Icon.CircleProgress100, tintColor: Color.Green },
-  { title: 'Maintenance', source: Icon.CircleEllipsis, tintColor: Color.Magenta },
-  { title: 'Blocked',  source: Icon.Stop, tintColor: Color.Red }, 
+  { title: "Backlog", source: Icon.Circle, tintColor: Color.PrimaryText },
+  { title: "In Progress", source: Icon.CircleProgress25, tintColor: Color.Yellow },
+  { title: "Paused", source: Icon.CircleProgress50, tintColor: Color.Orange },
+  { title: "In Review", source: Icon.CircleProgress75, tintColor: Color.Blue },
+  { title: "Completed", source: Icon.CircleProgress100, tintColor: Color.Green },
+  { title: "Maintenance", source: Icon.CircleEllipsis, tintColor: Color.Magenta },
+  { title: "Blocked", source: Icon.Stop, tintColor: Color.Red },
 ];
 
 const externalLink = [
-  { id: 'website', placeholder: 'Live website url'}, 
-  { id: 'backend', placeholder: 'shopify, sanity, wordpress, contentful...'}, 
-  { id: 'repo',  placeholder: 'Github, Gitlab, Bitbucket...'}, 
-  { id: 'roadmap', placeholder: 'Jira, Linear, Notion, Monday...'},
-  { id: 'design', placeholder: 'Figma, Sketch...'},
-  { id: 'extra',  placeholder: 'Any other useful link'}, 
+  { id: "website", placeholder: "Live website url" },
+  { id: "backend", placeholder: "shopify, sanity, wordpress, contentful..." },
+  { id: "repo", placeholder: "Github, Gitlab, Bitbucket..." },
+  { id: "roadmap", placeholder: "Jira, Linear, Notion, Monday..." },
+  { id: "design", placeholder: "Figma, Sketch..." },
+  { id: "extra", placeholder: "Any other useful link" },
 ];
 
 export default function Command() {
-  
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -69,12 +68,15 @@ export default function Command() {
 
   const getStatusIcon = (status: string): { source: Icon; tintColor?: Color } => {
     const statusIcons: { [key: string]: { source: Icon; tintColor?: Color } } = {
-      ...projectStatus.reduce((icons, { title, source, tintColor }) => {
-        icons[title] = { source, tintColor };
-        return icons;
-      }, {} as { [key: string]: { source: Icon; tintColor?: Color } }), // Add index signature
+      ...projectStatus.reduce(
+        (icons, { title, source, tintColor }) => {
+          icons[title] = { source, tintColor };
+          return icons;
+        },
+        {} as { [key: string]: { source: Icon; tintColor?: Color } },
+      ), // Add index signature
     };
-    
+
     return statusIcons[status] || { source: Icon.Circle };
   };
 
@@ -109,82 +111,57 @@ export default function Command() {
                     />
                   </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
-                  {project.website ? 
+                  {project.website ? (
                     <List.Item.Detail.Metadata.Link
                       title="Website"
                       target={project.website}
-                      text={
-                        project.website.length > 32
-                        ? project.website.substring(0, 32) + '...'
-                        : project.website
-                      }
+                      text={project.website.length > 32 ? project.website.substring(0, 32) + "..." : project.website}
                     />
-                    : null
-                  }
-                  {project.backend ? 
+                  ) : null}
+                  {project.backend ? (
                     <List.Item.Detail.Metadata.Link
                       title="Backend"
                       target={project.backend}
-                      text={
-                        project.backend.length > 32
-                        ? project.backend.substring(0, 32) + '...'
-                        : project.backend
-                      }
+                      text={project.backend.length > 32 ? project.backend.substring(0, 32) + "..." : project.backend}
                     />
-                    : null
-                  }
-                  
-                  {project.repo ? 
+                  ) : null}
+
+                  {project.repo ? (
                     <List.Item.Detail.Metadata.Link
                       title="Repository"
                       target={project.repo || ""}
-                      text={
-                        project.repo.length > 32
-                        ? project.repo.substring(0, 32) + '...'
-                        : project.repo
-                      }
+                      text={project.repo.length > 32 ? project.repo.substring(0, 32) + "..." : project.repo}
                     />
-                    : null
-                  }
-                  
-                  {project.roadmap ? 
+                  ) : null}
+
+                  {project.roadmap ? (
                     <List.Item.Detail.Metadata.Link
                       title="Roadmap"
                       target={project.roadmap || ""}
-                      text={
-                        project.roadmap.length > 32
-                        ? project.roadmap.substring(0, 32) + '...'
-                        : project.roadmap
-                      }
+                      text={project.roadmap.length > 32 ? project.roadmap.substring(0, 32) + "..." : project.roadmap}
                     />
-                    : null
-                  }
-                  {project.design ? 
-                  <List.Item.Detail.Metadata.Link
-                    title="Design Files"
-                    target={project.design || ""}
-                    text={
-                        project.design.length > 32
-                        ? project.design.substring(0, 32) + '...'
-                        : project.design
-                      }
-                  />
-                    : null
-                  }
+                  ) : null}
+                  {project.design ? (
+                    <List.Item.Detail.Metadata.Link
+                      title="Design Files"
+                      target={project.design || ""}
+                      text={project.design.length > 32 ? project.design.substring(0, 32) + "..." : project.design}
+                    />
+                  ) : null}
                 </List.Item.Detail.Metadata>
               }
             />
           }
           actions={
             <ActionPanel>
-                { project.favorite ?  
+              {project.favorite ? (
                 <ActionPanel.Section>
                   <Action.OpenInBrowser
                     url={project[`${project.favorite}` as keyof Project] ?? ""}
                     title={`Open ${project.favorite} in Browser`}
-                  />  
-                  </ActionPanel.Section>
-                : null }
+                  />
+                </ActionPanel.Section>
+              ) : null}
               <ActionPanel.Section>
                 <CreateProjectAction onCreate={handleCreate} />
                 <EditProjectAction onEdit={handleEdit} project={project} index={index} />
@@ -201,27 +178,27 @@ export default function Command() {
 function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
   const { pop } = useNavigation();
 
-  function handleSubmit(values: { 
-    title: string, 
-    status: string, 
-    backend: string,
-    description: string, 
-    website: string, 
-    repo: string, 
-    roadmap: string,
-    design: string,
-    favorite: string
+  function handleSubmit(values: {
+    title: string;
+    status: string;
+    backend: string;
+    description: string;
+    website: string;
+    repo: string;
+    roadmap: string;
+    design: string;
+    favorite: string;
   }) {
-    props.onCreate({ 
-      title: values.title, 
-      status: values.status, 
-      backend: values.backend, 
-      description: values.description, 
-      website: values.website, 
-      repo: values.repo, 
-      roadmap: values.roadmap, 
+    props.onCreate({
+      title: values.title,
+      status: values.status,
+      backend: values.backend,
+      description: values.description,
+      website: values.website,
+      repo: values.repo,
+      roadmap: values.roadmap,
       design: values.design,
-      favorite: values.favorite
+      favorite: values.favorite,
     });
     pop();
   }
@@ -235,17 +212,22 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="project name"/>
-      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" />
+      <Form.TextField id="title" title="Title" placeholder="project name" />
+      <Form.TextArea
+        id="description"
+        title="Project Description"
+        placeholder="project description (Markdown enabled)"
+      />
       <Form.Dropdown id="status" title="Status" defaultValue={projectStatus[0].title}>
         {projectStatus.map((status, index) => (
           <Form.Dropdown.Item
             key={index}
-            icon={{ source: status.source, tintColor: status.tintColor }} 
-            title={status.title} value={status.title}
+            icon={{ source: status.source, tintColor: status.tintColor }}
+            title={status.title}
+            value={status.title}
           />
         ))}
-        </Form.Dropdown>
+      </Form.Dropdown>
       <Form.Separator />
       {externalLink.map((link, index) => (
         <Form.TextField
@@ -257,11 +239,7 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
       ))}
       <Form.Dropdown id="favorite" title="Quick Open" defaultValue={externalLink[0].id}>
         {externalLink.map((link, index) => (
-          <Form.Dropdown.Item
-            key={index}
-            title={link.id}
-            value={link.id}
-          />
+          <Form.Dropdown.Item key={index} title={link.id} value={link.id} />
         ))}
       </Form.Dropdown>
     </Form>
@@ -290,34 +268,34 @@ function DeleteProjectAction(props: { onDelete: () => void }) {
   );
 }
 
-function EditProjectForm(props: { 
-  onEdit: (index: number, project: Project) => void,
-  project: Project,
-  index: number,
+function EditProjectForm(props: {
+  onEdit: (index: number, project: Project) => void;
+  project: Project;
+  index: number;
 }) {
   const { pop } = useNavigation();
 
-  function handleSubmit(values: { 
-    title: string, 
-    status: string, 
-    backend: string,
-    description: string, 
-    website: string, 
-    repo: string, 
-    roadmap: string, 
-    design: string
-    favorite: string
+  function handleSubmit(values: {
+    title: string;
+    status: string;
+    backend: string;
+    description: string;
+    website: string;
+    repo: string;
+    roadmap: string;
+    design: string;
+    favorite: string;
   }) {
-    props.onEdit(props.index, { 
-      title: values.title, 
-      status: values.status, 
-      backend: values.backend, 
-      description: values.description, 
-      website: values.website, 
-      repo: values.repo, 
-      roadmap: values.roadmap, 
+    props.onEdit(props.index, {
+      title: values.title,
+      status: values.status,
+      backend: values.backend,
+      description: values.description,
+      website: values.website,
+      repo: values.repo,
+      roadmap: values.roadmap,
       design: values.design,
-      favorite: values.favorite
+      favorite: values.favorite,
     });
     pop();
   }
@@ -332,21 +310,23 @@ function EditProjectForm(props: {
       }
     >
       <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.project.title} />
-      <Form.Dropdown 
-        id="status" 
-        title="Status" 
-        defaultValue={props.project.status}
-      >
+      <Form.Dropdown id="status" title="Status" defaultValue={props.project.status}>
         {projectStatus.map((status, index) => (
           <Form.Dropdown.Item
             key={index}
-            icon={{ source: status.source, tintColor: status.tintColor }} 
-            title={status.title} value={status.title}
+            icon={{ source: status.source, tintColor: status.tintColor }}
+            title={status.title}
+            value={status.title}
           />
         ))}
       </Form.Dropdown>
-      
-      <Form.TextArea id="description" title="Project Description" placeholder="project description (Markdown enabled)" defaultValue={props.project.description}/>
+
+      <Form.TextArea
+        id="description"
+        title="Project Description"
+        placeholder="project description (Markdown enabled)"
+        defaultValue={props.project.description}
+      />
       <Form.Separator />
       {externalLink.map((link, index) => (
         <Form.TextField
@@ -359,27 +339,24 @@ function EditProjectForm(props: {
       ))}
       <Form.Dropdown id="favorite" title="Quick Open" defaultValue={props.project.favorite}>
         {externalLink.map((link, index) => (
-          <Form.Dropdown.Item
-            key={index}
-            title={link.id} value={link.id}
-          />
+          <Form.Dropdown.Item key={index} title={link.id} value={link.id} />
         ))}
       </Form.Dropdown>
     </Form>
   );
 }
 
-function EditProjectAction(props: { 
-  onEdit: (index: number, project: Project) => void, 
-  project: Project, 
-  index: number 
+function EditProjectAction(props: {
+  onEdit: (index: number, project: Project) => void;
+  project: Project;
+  index: number;
 }) {
   return (
     <Action.Push
       icon={Icon.Pencil}
       title="Edit Project"
       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-      target={<EditProjectForm onEdit={props.onEdit} project={props.project} index={props.index}/>}
+      target={<EditProjectForm onEdit={props.onEdit} project={props.project} index={props.index} />}
     />
   );
 }
