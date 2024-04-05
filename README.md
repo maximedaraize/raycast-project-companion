@@ -1,4 +1,4 @@
-# Project Manager Assistant
+# raycast-project-companion
 
 Create, Update, Delete your projects.
 
