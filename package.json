@@ -3,7 +3,7 @@
   "name": "project-companion",
   "title": "Project Companion",
   "description": "Extension allowing you to add, update, delete and search your projects",
-  "icon": "logo_icon.png",
+  "icon": "logo.png",
   "author": "maximedaraize",
   "categories": [
     "Developer Tools",
@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Project Companion",
+      "title": "Manage Projects",
       "subtitle": "Create, update, delete, search",
       "description": "Extension allowing you to add, update, delete and search your projects",
       "mode": "view"

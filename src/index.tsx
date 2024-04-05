@@ -284,7 +284,7 @@ function DeleteProjectAction(props: { onDelete: () => void }) {
     <Action
       icon={Icon.Trash}
       title="Delete Project"
-      shortcut={{ modifiers: ["cmd", "opt"], key: "delete" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
       onAction={props.onDelete}
     />
   );
@@ -378,7 +378,7 @@ function EditProjectAction(props: {
     <Action.Push
       icon={Icon.Pencil}
       title="Edit Project"
-      shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
       target={<EditProjectForm onEdit={props.onEdit} project={props.project} index={props.index}/>}
     />
   );
