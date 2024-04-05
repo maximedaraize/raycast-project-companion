@@ -78,6 +78,7 @@ export default function Command() {
     return statusIcons[status] || { source: Icon.Circle };
   };
 
+  // List View
   return (
     <List
       isShowingDetail
@@ -225,6 +226,7 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
     pop();
   }
 
+  // Create View
   return (
     <Form
       actions={
@@ -320,6 +322,7 @@ function EditProjectForm(props: {
     pop();
   }
 
+  // Create View
   return (
     <Form
       actions={
@@ -333,7 +336,6 @@ function EditProjectForm(props: {
         id="status" 
         title="Status" 
         defaultValue={props.project.status}
-        storeValue
       >
         {projectStatus.map((status, index) => (
           <Form.Dropdown.Item
