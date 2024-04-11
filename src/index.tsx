@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage, confirmAlert, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Project {
@@ -54,10 +54,20 @@ export default function Command() {
     setProjects(newProjects);
   }
 
-  function handleDelete(index: number) {
-    const newProjects = [...projects];
-    newProjects.splice(index, 1);
-    setProjects(newProjects);
+  async function handleDelete(index: number) {
+    const options: Alert.Options = {
+      title: "Are you sure?",
+      message: "This cannot be undone.",
+      primaryAction: {
+        title: "Delete Project",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
+    if (await confirmAlert(options)) {
+      const newProjects = [...projects];
+      newProjects.splice(index, 1);
+      setProjects(newProjects);
+    }
   }
 
   function handleEdit(index: number, editedProject: Project) {
@@ -264,6 +274,7 @@ function DeleteProjectAction(props: { onDelete: () => void }) {
       title="Delete Project"
       shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
       onAction={props.onDelete}
+      style={Action.Style.Destructive}
     />
   );
 }
