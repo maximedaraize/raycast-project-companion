@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation, Color, LocalStorage, confirmAlert, Alert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  List,
+  useNavigation,
+  Color,
+  LocalStorage,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Project {
