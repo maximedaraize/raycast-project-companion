@@ -21,6 +21,7 @@ interface Project {
   repo?: string;
   roadmap?: string;
   design?: string;
+  other?: string;
   favorite?: string;
 }
 
@@ -40,7 +41,7 @@ const externalLink = [
   { id: "repo", placeholder: "Github, Gitlab, Bitbucket..." },
   { id: "roadmap", placeholder: "Jira, Linear, Notion, Monday..." },
   { id: "design", placeholder: "Figma, Sketch..." },
-  { id: "extra", placeholder: "Any other useful link" },
+  { id: "other", placeholder: "Any other useful link" },
 ];
 
 export default function Command() {
@@ -167,6 +168,13 @@ export default function Command() {
                       title="Design Files"
                       target={project.design || ""}
                       text={project.design.length > 32 ? project.design.substring(0, 32) + "..." : project.design}
+                    />
+                  ) : null}
+                  {project.other ? (
+                    <List.Item.Detail.Metadata.Link
+                      title="Other"
+                      target={project.other || ""}
+                      text={project.other.length > 32 ? project.other.substring(0, 32) + "..." : project.other}
                     />
                   ) : null}
                 </List.Item.Detail.Metadata>
@@ -306,6 +314,7 @@ function EditProjectForm(props: {
     repo: string;
     roadmap: string;
     design: string;
+    other: string;
     favorite: string;
   }) {
     props.onEdit(props.index, {
@@ -317,6 +326,7 @@ function EditProjectForm(props: {
       repo: values.repo,
       roadmap: values.roadmap,
       design: values.design,
+      other: values.other,
       favorite: values.favorite,
     });
     pop();
