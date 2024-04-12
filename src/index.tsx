@@ -10,6 +10,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 
 interface Project {
@@ -207,7 +208,7 @@ export default function Command() {
 function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
   const { pop } = useNavigation();
 
-  function handleSubmit(values: {
+  const submitForm = (values: {
     title: string;
     status: string;
     backend: string;
@@ -217,7 +218,7 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
     roadmap: string;
     design: string;
     favorite: string;
-  }) {
+  }) => {
     props.onCreate({
       title: values.title,
       status: values.status,
@@ -232,6 +233,13 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
     pop();
   }
 
+  const { handleSubmit, itemProps } = useForm({
+    onSubmit: submitForm,
+    validation: {
+      title: FormValidation.Required,
+    }
+  });
+
   // Create View
   return (
     <Form
@@ -241,7 +249,8 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="project name" />
+      <Form.TextField 
+      title="Title" placeholder="project name" {...itemProps.title}/>
       <Form.TextArea
         id="description"
         title="Project Description"
@@ -304,8 +313,11 @@ function EditProjectForm(props: {
   index: number;
 }) {
   const { pop } = useNavigation();
+  const [title, setTitle] = useState(props.project.title);
 
-  function handleSubmit(values: {
+  const initialValues = { title };
+
+  const submitForm = (values: {
     title: string;
     status: string;
     backend: string;
@@ -316,7 +328,7 @@ function EditProjectForm(props: {
     design: string;
     other: string;
     favorite: string;
-  }) {
+  }) => {
     props.onEdit(props.index, {
       title: values.title,
       status: values.status,
@@ -332,16 +344,31 @@ function EditProjectForm(props: {
     pop();
   }
 
-  // Create View
+  const { handleSubmit, itemProps } = useForm({
+    onSubmit: submitForm,
+    validation: {
+      title: FormValidation.Required,
+    },
+    initialValues,
+  });
+
+  // Edit View
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit}  />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="project name" defaultValue={props.project.title} />
+      <Form.TextField
+        title="Title"
+        placeholder="project name"
+        value={title}
+        onChange={(newValue) => setTitle(newValue)}
+        {...itemProps.title}
+      />
+
       <Form.Dropdown id="status" title="Status" defaultValue={props.project.status}>
         {projectStatus.map((status, index) => (
           <Form.Dropdown.Item
