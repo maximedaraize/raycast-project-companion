@@ -231,13 +231,13 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
       favorite: values.favorite,
     });
     pop();
-  }
+  };
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit: submitForm,
     validation: {
       title: FormValidation.Required,
-    }
+    },
   });
 
   // Create View
@@ -249,8 +249,7 @@ function CreateProjectForm(props: { onCreate: (project: Project) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField 
-      title="Title" placeholder="project name" {...itemProps.title}/>
+      <Form.TextField title="Title" placeholder="project name" {...itemProps.title} />
       <Form.TextArea
         id="description"
         title="Project Description"
@@ -342,7 +341,7 @@ function EditProjectForm(props: {
       favorite: values.favorite,
     });
     pop();
-  }
+  };
 
   const { handleSubmit, itemProps } = useForm({
     onSubmit: submitForm,
@@ -357,7 +356,7 @@ function EditProjectForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit}  />
+          <Action.SubmitForm title="Edit Project" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
